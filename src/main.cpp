@@ -7,8 +7,8 @@
 #include "homie.hpp"
 
 #define CLIENTID "ESP8266Client-"
-#define SLEEPSECONDS 300
-#define SERIAL true
+#define SLEEPSECONDS 1800
+#define SERIAL false
 #define HOMIE_SERIAL false
 #define BAT_CORRECTION 4665
 
@@ -183,10 +183,10 @@ void loop() {
                 homieCTRL.sleep();
                 if(SERIAL) Serial.print("deepSleep for ");
                 long sleepTime = 1000000 * SLEEPSECONDS;
-                if(batData.percentage < 15) {
+                if(batData.percentage < 10) {
                         sleepTime = sleepTime * 4;
                 } else {
-                        if(batData.percentage < 30) {
+                        if(batData.percentage < 15) {
                                 sleepTime = sleepTime * 2;
                         }
                 }
@@ -210,7 +210,9 @@ bat_t getBatData(){
         float correction = (float)BAT_CORRECTION / (float)1000000;
         long vbat = analogRead(A0);
         data.volt = (float)vbat * correction;
-        data.percentage = (data.volt - 2.9) / (4.2 - 2.9) * (float) 100;
+        //Main Energy of the battery is before 3.6V
+        data.percentage = (data.volt - 3.6) / (4.2 - 3.6) * (float) 100;
+        if(data.percentage < 0) data.percentage = 0;
         return data;
 }
 
